@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"reflect"
+
+	"json2csv/jsonpointer"
 )
 
 func main() {
@@ -21,17 +23,17 @@ func main() {
 	}
 	fmt.Printf("%v\n", data)
 
-	tokens := Tokens{"foo", "0", "bar", "foo/bar", "foo~bar", "foo\"bar", "foo\\bar"}
-	fmt.Println("         JSONPointer:", tokens.JSONPointer())
-	fmt.Println("         DotNotation:", tokens.DotNotation(false))
-	fmt.Println("DotNotation(bracket):", tokens.DotNotation(true))
+	pointer := jsonpointer.JSONPointer{"foo", "0", "bar", "foo/bar", "foo~bar", "foo\"bar", "foo\\bar"}
+	fmt.Println("         JSONPointer:", pointer)
+	fmt.Println("         DotNotation:", pointer.DotNotation(false))
+	fmt.Println("DotNotation(bracket):", pointer.DotNotation(true))
 
-	k2, err := ParseJSONPointer(tokens.JSONPointer())
+	pointer2, err := jsonpointer.NewJSONPointer(pointer.String())
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Parsed:", k2)
-	if reflect.DeepEqual(tokens, k2) {
-		fmt.Println("tokens == k2")
+	fmt.Println("Parsed:", pointer2)
+	if reflect.DeepEqual(pointer, pointer2) {
+		fmt.Println("pointer == pointer2")
 	}
 }
