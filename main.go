@@ -21,17 +21,17 @@ func main() {
 	}
 	fmt.Printf("%v\n", data)
 
-	keys := Keys{"foo", 0, "bar", "foo/bar", "foo~bar", "foo\"bar", "foo\\bar"}
-	fmt.Println("         JSONPointer:", keys.JSONPointer())
-	fmt.Println("         DotNotation:", keys.DotNotation(false))
-	fmt.Println("DotNotation(bracket):", keys.DotNotation(true))
+	tokens := Tokens{"foo", "0", "bar", "foo/bar", "foo~bar", "foo\"bar", "foo\\bar"}
+	fmt.Println("         JSONPointer:", tokens.JSONPointer())
+	fmt.Println("         DotNotation:", tokens.DotNotation(false))
+	fmt.Println("DotNotation(bracket):", tokens.DotNotation(true))
 
-	k2, err := ParseJSONPointer(keys.JSONPointer())
+	k2, err := ParseJSONPointer(tokens.JSONPointer())
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Parsed:", k2)
-	if reflect.DeepEqual(keys, k2) {
-		fmt.Println("keys == k2")
+	if reflect.DeepEqual(tokens, k2) {
+		fmt.Println("tokens == k2")
 	}
 }

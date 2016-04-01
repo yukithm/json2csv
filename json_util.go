@@ -2,18 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"reflect"
 	"strconv"
 	"strings"
 )
 
-// Keys is a equence of keys/indexes.
-// keys contains only string and int.
-type Keys []interface{}
+// Tokens is a sequence of token.
+// Tokens contains only strings even if a token is an index of array.
+type Tokens []string
 
-// ParseJSONPointer parses JSON Pointer and return Keys.
-func ParseJSONPointer(pointer string) (Keys, error) {
+// ParseJSONPointer parses JSON Pointer and return Tokens.
+func ParseJSONPointer(pointer string) (Tokens, error) {
 	pointer = strings.TrimSpace(pointer)
 	if !strings.HasPrefix(pointer, "/") {
 		return nil, fmt.Errorf("Invalid JSON Pointer %q", pointer)
@@ -24,62 +22,44 @@ func ParseJSONPointer(pointer string) (Keys, error) {
 		return nil, fmt.Errorf("Invalid JSON Pointer %q", pointer)
 	}
 
-	keys := make(Keys, 0, len(parts))
+	tokens := make(Tokens, 0, len(parts))
 	for _, part := range parts {
-		if index, err := strconv.Atoi(part); err == nil {
-			keys = append(keys, index)
-		} else {
-			keys = append(keys, unescapePart(part))
-		}
+		tokens = append(tokens, unescapePart(part))
 	}
 
-	return keys, nil
+	return tokens, nil
 }
 
 // DotNotation returns dot-notated representation.
-func (keys *Keys) DotNotation(bracketIndex bool) string {
+func (t *Tokens) DotNotation(bracketIndex bool) string {
 	if !bracketIndex {
-		return keys.join(".", false)
+		return t.join(".", false)
 	}
 
-	parts := make([]string, 0, len(*keys))
-	for _, k := range *keys {
-		switch key := k.(type) {
-		case string:
-			parts = append(parts, key)
-		case int, uint:
-			parts[len(parts)-1] += fmt.Sprintf("[%d]", key)
-		default:
-			v := reflect.ValueOf(k)
-			log.Fatalf("Unsupported key type %q", v.Type())
+	parts := make([]string, 0, len(*t))
+	for _, token := range *t {
+		if isInt(token) {
+			// foo[0] style
+			parts[len(parts)-1] += fmt.Sprintf("[%s]", token)
+		} else {
+			parts = append(parts, token)
 		}
 	}
 	return strings.Join(parts, ".")
 }
 
 // JSONPointer returns JSON Pointer representation.
-func (keys *Keys) JSONPointer() string {
-	return "/" + keys.join("/", true)
+func (t *Tokens) JSONPointer() string {
+	return "/" + t.join("/", true)
 }
 
-func (keys *Keys) join(sep string, escapeJSONPointer bool) string {
-	parts := make([]string, 0, len(*keys))
-	for _, k := range *keys {
-		var part string
-		switch key := k.(type) {
-		case string:
-			part = key
-		case int:
-			part = strconv.Itoa(key)
-		case uint:
-			part = strconv.FormatUint(uint64(key), 10)
-		default:
-			log.Fatalf("Unsupported key type %q", reflect.TypeOf(k))
-		}
+func (t *Tokens) join(sep string, escapeJSONPointer bool) string {
+	parts := make([]string, 0, len(*t))
+	for _, token := range *t {
 		if escapeJSONPointer {
-			part = escapePart(part)
+			token = escapePart(token)
 		}
-		parts = append(parts, part)
+		parts = append(parts, token)
 	}
 	return strings.Join(parts, sep)
 }
@@ -98,4 +78,9 @@ func unescapePart(part string) string {
 		"~0", "~",
 	)
 	return r.Replace(part)
+}
+
+func isInt(value string) bool {
+	_, err := strconv.Atoi(value)
+	return err == nil
 }
