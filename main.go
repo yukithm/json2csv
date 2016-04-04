@@ -7,8 +7,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-
-	"json2csv/jsonpointer"
 )
 
 func main() {
@@ -21,19 +19,35 @@ func main() {
 	if err := json.Unmarshal(buf, &data); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%v\n", data)
 
-	pointer := jsonpointer.JSONPointer{"foo", "0", "bar", "foo/bar", "foo~bar", "foo\"bar", "foo\\bar"}
-	fmt.Println("         JSONPointer:", pointer)
-	fmt.Println("         DotNotation:", pointer.DotNotation(false))
-	fmt.Println("DotNotation(bracket):", pointer.DotNotation(true))
+	var results []keyValue
+	v := valueOf(data)
+	switch v.Kind() {
+	case reflect.Map:
+		result := flatten(v)
+		results = append(results, result)
+	case reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			result := flatten(v.Index(i))
+			results = append(results, result)
+		}
+	default:
+		log.Fatal("Unsupported JSON structure.")
+	}
 
-	pointer2, err := jsonpointer.NewJSONPointer(pointer.String())
+	fmt.Println(results)
+
+	js, err := json.MarshalIndent(results, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Parsed:", pointer2)
-	if reflect.DeepEqual(pointer, pointer2) {
-		fmt.Println("pointer == pointer2")
+	fmt.Println(string(js))
+}
+
+func valueOf(obj interface{}) reflect.Value {
+	v := reflect.ValueOf(obj)
+	for v.Kind() == reflect.Interface {
+		v = v.Elem()
 	}
+	return v
 }
