@@ -50,7 +50,7 @@ func TestLen(t *testing.T) {
 	for caseIndex, testCase := range testLenCases {
 		pointer, err := NewJSONPointer(testCase.pointer)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		actual := pointer.Len()
 		if !reflect.DeepEqual(actual, testCase.expected) {
@@ -78,7 +78,7 @@ func TestAppend(t *testing.T) {
 	for caseIndex, testCase := range testAppendCases {
 		pointer, err := NewJSONPointer(testCase.pointer)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		pointer.Append(Token(testCase.token))
 		actual := pointer.String()
@@ -107,7 +107,7 @@ func TestPop(t *testing.T) {
 	for caseIndex, testCase := range testPopCases {
 		pointer, err := NewJSONPointer(testCase.pointer)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		removed := pointer.Pop()
@@ -126,7 +126,7 @@ func TestClone(t *testing.T) {
 	orig, err := NewJSONPointer("/foo/bar")
 	pointer, err := NewJSONPointer("/foo/bar")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	cloned := pointer.Clone()
@@ -158,7 +158,7 @@ func TestStrings(t *testing.T) {
 	for caseIndex, testCase := range testStringsCases {
 		pointer, err := NewJSONPointer(testCase.pointer)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		actual := pointer.Strings()
 		if !reflect.DeepEqual(actual, testCase.expected) {
@@ -185,7 +185,7 @@ func TestEscapedStrings(t *testing.T) {
 	for caseIndex, testCase := range testEscapedStringsCases {
 		pointer, err := NewJSONPointer(testCase.pointer)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		actual := pointer.EscapedStrings()
 		if !reflect.DeepEqual(actual, testCase.expected) {
@@ -212,7 +212,7 @@ func TestString(t *testing.T) {
 	for caseIndex, testCase := range testStringCases {
 		pointer, err := NewJSONPointer(testCase.pointer)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		actual := pointer.String()
 		if actual != testCase.expected {
@@ -240,7 +240,7 @@ func TestDotNotation(t *testing.T) {
 	for caseIndex, testCase := range testDotNotationCases {
 		pointer, err := NewJSONPointer(testCase.pointer)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		actual := pointer.DotNotation(false)
 		if actual != testCase.expected {
