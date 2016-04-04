@@ -12,6 +12,10 @@ type JSONPointer []Token
 // NewJSONPointer parses a pointer string and creates a new JSONPointer.
 func NewJSONPointer(pointer string) (JSONPointer, error) {
 	pointer = strings.TrimSpace(pointer)
+	if pointer == "" {
+		return JSONPointer{}, nil
+	}
+
 	if !strings.HasPrefix(pointer, "/") {
 		return nil, fmt.Errorf("Invalid JSON Pointer %q", pointer)
 	}
@@ -49,6 +53,11 @@ func (p JSONPointer) EscapedStrings() []string {
 
 // String returns JSON Pointer representation.
 func (p JSONPointer) String() string {
+	s := p.EscapedStrings()
+	if len(s) == 0 {
+		return ""
+	}
+
 	return "/" + strings.Join(p.EscapedStrings(), "/")
 }
 

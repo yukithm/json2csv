@@ -15,8 +15,10 @@ var testNewJSONPointerCases = []struct {
 	{`/foo~1bar`, []Token{`foo/bar`}, ``},
 	{`/foo/bar`, []Token{`foo`, `bar`}, ``},
 	{`/foo/0/bar`, []Token{`foo`, `0`, `bar`}, ``},
+	{`/`, []Token{""}, ``},      // empty string key
+	{`//`, []Token{"", ""}, ``}, // empty string key
+	{``, []Token{}, ``},         // whole content (root)
 	{`foo`, nil, `Invalid JSON Pointer "foo"`},
-	{``, nil, `Invalid JSON Pointer ""`},
 }
 
 func TestNewJSONPointer(t *testing.T) {
@@ -42,6 +44,9 @@ var testStringsCases = []struct {
 	{`/foo~1bar`, []string{`foo/bar`}},
 	{`/foo/bar`, []string{`foo`, `bar`}},
 	{`/foo/0/bar`, []string{`foo`, `0`, `bar`}},
+	{`/`, []string{""}},      // empty string key
+	{`//`, []string{"", ""}}, // empty string key
+	{``, []string{}},         // whole content (root)
 }
 
 func TestStrings(t *testing.T) {
@@ -66,6 +71,9 @@ var testEscapedStringsCases = []struct {
 	{`/foo~1bar`, []string{`foo~1bar`}},
 	{`/foo/bar`, []string{`foo`, `bar`}},
 	{`/foo/0/bar`, []string{`foo`, `0`, `bar`}},
+	{`/`, []string{""}},      // empty string key
+	{`//`, []string{"", ""}}, // empty string key
+	{``, []string{}},         // whole content (root)
 }
 
 func TestEscapedStrings(t *testing.T) {
@@ -90,6 +98,9 @@ var testStringCases = []struct {
 	{`/foo~1bar`, `/foo~1bar`},
 	{`/foo/bar`, `/foo/bar`},
 	{`/foo/0/bar`, `/foo/0/bar`},
+	{`/`, `/`},   // empty string key
+	{`//`, `//`}, // empty string key
+	{``, ``},     // whole content (root)
 }
 
 func TestString(t *testing.T) {
@@ -115,6 +126,9 @@ var testDotNotationCases = []struct {
 	{`/foo~1bar`, `foo/bar`, `foo/bar`},
 	{`/foo/bar`, `foo.bar`, `foo.bar`},
 	{`/foo/0/bar`, `foo.0.bar`, `foo[0].bar`},
+	{`/`, ``, ``},    // empty string key
+	{`//`, `.`, `.`}, // empty string key
+	{``, ``, ``},     // whole content (root)
 }
 
 func TestDotNotation(t *testing.T) {
