@@ -35,6 +35,111 @@ func TestNewJSONPointer(t *testing.T) {
 	}
 }
 
+var testLenCases = []struct {
+	pointer  string
+	expected int
+}{
+	{`/foo`, 1},
+	{`/foo~0bar`, 1},
+	{`/foo~1bar`, 1},
+	{`/foo/bar`, 2},
+	{`/foo/0/bar`, 3},
+}
+
+func TestLen(t *testing.T) {
+	for caseIndex, testCase := range testLenCases {
+		pointer, err := NewJSONPointer(testCase.pointer)
+		if err != nil {
+			t.Error(err)
+		}
+		actual := pointer.Len()
+		if !reflect.DeepEqual(actual, testCase.expected) {
+			t.Errorf("%d: Expected %v, but %v", caseIndex, testCase.expected, actual)
+		}
+	}
+}
+
+var testAppendCases = []struct {
+	pointer  string
+	token    string
+	expected string
+}{
+	{`/foo`, `append`, `/foo/append`},
+	{`/foo~0bar`, `append`, `/foo~0bar/append`},
+	{`/foo~1bar`, `append`, `/foo~1bar/append`},
+	{`/foo/bar`, `append`, `/foo/bar/append`},
+	{`/foo/0/bar`, `append`, `/foo/0/bar/append`},
+	{`/`, `append`, `//append`},
+	{`//`, `append`, `///append`},
+	{``, `append`, `/append`},
+}
+
+func TestAppend(t *testing.T) {
+	for caseIndex, testCase := range testAppendCases {
+		pointer, err := NewJSONPointer(testCase.pointer)
+		if err != nil {
+			t.Error(err)
+		}
+		pointer.Append(Token(testCase.token))
+		actual := pointer.String()
+		if !reflect.DeepEqual(actual, testCase.expected) {
+			t.Errorf("%d: Expected %v, but %v", caseIndex, testCase.expected, actual)
+		}
+	}
+}
+
+var testPopCases = []struct {
+	pointer  string
+	removed  string
+	expected string
+}{
+	{`/foo`, `foo`, ``},
+	{`/foo~0bar`, `foo~bar`, ``},
+	{`/foo~1bar`, `foo/bar`, ``},
+	{`/foo/bar`, `bar`, `/foo`},
+	{`/foo/0/bar`, `bar`, `/foo/0`},
+	{`/`, ``, ``},
+	{`//`, ``, `/`},
+	{``, ``, ``},
+}
+
+func TestPop(t *testing.T) {
+	for caseIndex, testCase := range testPopCases {
+		pointer, err := NewJSONPointer(testCase.pointer)
+		if err != nil {
+			t.Error(err)
+		}
+
+		removed := pointer.Pop()
+		if removed != Token(testCase.removed) {
+			t.Errorf("%d: Expected removed %v, but %v", caseIndex, Token(testCase.removed), removed)
+		}
+
+		actual := pointer.String()
+		if !reflect.DeepEqual(actual, testCase.expected) {
+			t.Errorf("%d: Expected %v, but %v", caseIndex, testCase.expected, actual)
+		}
+	}
+}
+
+func TestClone(t *testing.T) {
+	orig, err := NewJSONPointer("/foo/bar")
+	pointer, err := NewJSONPointer("/foo/bar")
+	if err != nil {
+		t.Error(err)
+	}
+
+	cloned := pointer.Clone()
+	if !reflect.DeepEqual(cloned, pointer) {
+		t.Errorf("Expected %v, but %v", pointer, cloned)
+	}
+
+	cloned.AppendString("baz")
+	if !reflect.DeepEqual(pointer, orig) {
+		t.Errorf("Expected %v, but %v", orig, pointer)
+	}
+}
+
 var testStringsCases = []struct {
 	pointer  string
 	expected []string

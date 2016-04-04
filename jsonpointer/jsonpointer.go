@@ -33,6 +33,46 @@ func NewJSONPointer(pointer string) (JSONPointer, error) {
 	return jp, nil
 }
 
+// Len returns the length of tokens.
+func (p *JSONPointer) Len() int {
+	return len(*p)
+}
+
+// Append appends the token.
+func (p *JSONPointer) Append(token Token) *JSONPointer {
+	*p = append(*p, token)
+	return p
+}
+
+// AppendString appends the token.
+func (p *JSONPointer) AppendString(token string) *JSONPointer {
+	*p = append(*p, Token(token))
+	return p
+}
+
+// Pop removes last token and return.
+func (p *JSONPointer) Pop() Token {
+	if p.Len() == 0 {
+		return Token("")
+	}
+
+	// t, *p := (*p)[len(*p)-1], (*p)[:len(*p)-1]
+	t := (*p)[len(*p)-1]
+	*p = (*p)[:len(*p)-1]
+	return t
+}
+
+// Clone returns a duplicate of the JSONPointer.
+func (p JSONPointer) Clone() JSONPointer {
+	if p.Len() == 0 {
+		return JSONPointer{}
+	}
+
+	obj := make(JSONPointer, len(p))
+	copy(obj, p)
+	return obj
+}
+
 // Strings returns an array of each token string.
 func (p JSONPointer) Strings() []string {
 	tokens := make([]string, 0, len(p))
