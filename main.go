@@ -31,6 +31,9 @@ Conver JSON FILE or STDIN to CSV.
 `
 
 func main() {
+	// Hide timestamp because this is CLI application, so just print message for users.
+	log.SetFlags(0)
+
 	oparser := flags.NewParser(&options, flags.HelpFlag|flags.PassDoubleDash|flags.PassAfterNonOption)
 	oparser.Usage = USAGE
 	args, err := oparser.Parse()
