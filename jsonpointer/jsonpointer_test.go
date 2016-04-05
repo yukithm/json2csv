@@ -1,6 +1,7 @@
 package jsonpointer
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 )
@@ -250,5 +251,67 @@ func TestDotNotation(t *testing.T) {
 		if actual != testCase.expectedBracket {
 			t.Errorf("%d: Expected %v, but %v", caseIndex, testCase.expectedBracket, actual)
 		}
+	}
+}
+
+var testGetJSON = `{
+	"foo": {
+		"bar": [
+			10,
+			{ "baz": 123 }
+		]
+	},
+	"foo/bar": 1.23,
+	"bar": true,
+	"baz": null
+}`
+var testGetCases = []struct {
+	pointer  string
+	expected interface{}
+	err      string
+}{
+	{`/foo/bar/0`, 10.0, ``},
+	{`/foo/bar/1/baz`, 123.0, ``},
+	{`/foo/bar/1`, map[string]interface{}{"baz": 123.0}, ``},
+	{`/foo/baz`, nil, `Invalid JSON Pointer "/foo/baz"`},
+	{`/foo~1bar`, 1.23, ``},
+	{`/bar`, true, ``},
+	{`/baz`, nil, ``},
+	{`/boo`, nil, `Invalid JSON Pointer "/boo"`},
+}
+
+func TestGet(t *testing.T) {
+	var obj interface{}
+	if err := json.Unmarshal([]byte(testGetJSON), &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	for caseIndex, testCase := range testGetCases {
+		pointer, err := NewJSONPointer(testCase.pointer)
+		if err != nil {
+			t.Fatal(err)
+		}
+		actual, err := pointer.Get(obj)
+		if err != nil {
+			if err.Error() != testCase.err {
+				t.Errorf("%d: Expected %v, but %v", caseIndex, testCase.err, err)
+			}
+		} else if !reflect.DeepEqual(actual, testCase.expected) {
+			t.Errorf("%d: Expected %v, but %v", caseIndex, testCase.expected, actual)
+		}
+	}
+
+	// root pointer
+	pointer, err := NewJSONPointer("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual, err := pointer.Get(obj)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(actual, obj) {
+		t.Errorf("Expected %v, but %v", obj, actual)
 	}
 }

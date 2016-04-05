@@ -3,6 +3,8 @@ package jsonpointer
 
 import (
 	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -31,6 +33,15 @@ func NewJSONPointer(pointer string) (JSONPointer, error) {
 	}
 
 	return jp, nil
+}
+
+// Get retrieves a value from the obj.
+func Get(obj interface{}, pointer string) (interface{}, error) {
+	p, err := NewJSONPointer(pointer)
+	if err != nil {
+		return nil, err
+	}
+	return p.Get(obj)
 }
 
 // Len returns the length of tokens.
@@ -117,4 +128,44 @@ func (p JSONPointer) DotNotation(bracketIndex bool) string {
 		}
 	}
 	return strings.Join(tokens, ".")
+}
+
+// Get retrieves a value from the obj.
+func (p JSONPointer) Get(obj interface{}) (value interface{}, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("Invalid JSON Pointer %q", p)
+		}
+	}()
+
+	v := valueOf(obj)
+	for i := 0; i < p.Len(); i++ {
+		token := string(p[i])
+		switch v.Kind() {
+		case reflect.Map:
+			v = v.MapIndex(reflect.ValueOf(token))
+			v = valueOf(v)
+		case reflect.Slice:
+			if index, e := strconv.Atoi(token); e == nil {
+				v = v.Index(index)
+				v = valueOf(v)
+			} else {
+				return nil, fmt.Errorf("Invalid JSON Pointer %q", p)
+			}
+		}
+	}
+
+	return v.Interface(), nil
+}
+
+func valueOf(obj interface{}) reflect.Value {
+	v, ok := obj.(reflect.Value)
+	if !ok {
+		v = reflect.ValueOf(obj)
+	}
+
+	for v.Kind() == reflect.Interface && !v.IsNil() {
+		v = v.Elem()
+	}
+	return v
 }
