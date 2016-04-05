@@ -56,17 +56,26 @@ func main() {
 	v := valueOf(data)
 	switch v.Kind() {
 	case reflect.Map:
-		result := flatten(v)
-		results = append(results, result)
+		if result, err := flatten(v); err != nil {
+			log.Fatal(err)
+		} else {
+			results = append(results, result)
+		}
 	case reflect.Slice:
 		if isObjectArray(v) {
 			for i := 0; i < v.Len(); i++ {
-				result := flatten(v.Index(i))
-				results = append(results, result)
+				if result, err := flatten(v.Index(i)); err != nil {
+					log.Fatal(err)
+				} else {
+					results = append(results, result)
+				}
 			}
 		} else {
-			result := flatten(v)
-			results = append(results, result)
+			if result, err := flatten(v); err != nil {
+				log.Fatal(err)
+			} else {
+				results = append(results, result)
+			}
 		}
 	default:
 		log.Fatal("Unsupported JSON structure.")

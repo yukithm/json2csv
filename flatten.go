@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"reflect"
 	"sort"
 	"strconv"
@@ -31,14 +31,16 @@ func (kv keyValue) Keys() []string {
 	return keys
 }
 
-func flatten(obj interface{}) keyValue {
+func flatten(obj interface{}) (keyValue, error) {
 	f := make(keyValue, 0)
 	key := jsonpointer.JSONPointer{}
-	_flatten(f, obj, key)
-	return f
+	if err := _flatten(f, obj, key); err != nil {
+		return nil, err
+	}
+	return f, nil
 }
 
-func _flatten(out keyValue, obj interface{}, key jsonpointer.JSONPointer) {
+func _flatten(out keyValue, obj interface{}, key jsonpointer.JSONPointer) error {
 	value, ok := obj.(reflect.Value)
 	if !ok {
 		value = reflect.ValueOf(obj)
@@ -63,8 +65,9 @@ func _flatten(out keyValue, obj interface{}, key jsonpointer.JSONPointer) {
 	case reflect.Bool:
 		out[key.String()] = value.Bool()
 	default:
-		log.Fatal("Unknown kind: ", value.Kind())
+		return fmt.Errorf("Unknown kind: %s", value.Kind())
 	}
+	return nil
 }
 
 func _flattenMap(out map[string]interface{}, value reflect.Value, prefix jsonpointer.JSONPointer) {
