@@ -42,7 +42,6 @@ func main() {
 
 func printCSV(w io.Writer, results []keyValue) error {
 	csv := NewCSVWriter(w)
-	csv.style = JSONPointerStyle
 	if err := csv.WriteCSV(results); err != nil {
 		return err
 	}

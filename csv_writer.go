@@ -10,17 +10,21 @@ import (
 
 type keyStyle uint
 
+// Header style
 const (
 	JSONPointerStyle keyStyle = iota
+	SlashStyle
 	DotNotationStyle
 	DotBracketStyle
 )
 
+// CSVWriter writes CSV data.
 type CSVWriter struct {
 	*csv.Writer
-	style keyStyle
+	headerStyle keyStyle
 }
 
+// NewCSVWriter returns new CSVWriter with JSONPointerStyle.
 func NewCSVWriter(w io.Writer) *CSVWriter {
 	return &CSVWriter{
 		csv.NewWriter(w),
@@ -28,11 +32,23 @@ func NewCSVWriter(w io.Writer) *CSVWriter {
 	}
 }
 
+// WriteCSV writes CSV data.
 func (w *CSVWriter) WriteCSV(results []keyValue) error {
 	pts := allPointers(results)
 	sort.Sort(pts)
 	keys := pts.Strings()
-	header := keys
+
+	var header []string
+	switch w.headerStyle {
+	case JSONPointerStyle:
+		header = keys
+	case SlashStyle:
+		header = pts.Slashes()
+	case DotNotationStyle:
+		header = pts.DotNotations(false)
+	case DotBracketStyle:
+		header = pts.DotNotations(true)
+	}
 
 	if err := w.Write(header); err != nil {
 		return err

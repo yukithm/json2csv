@@ -1,6 +1,9 @@
 package main
 
-import "json2csv/jsonpointer"
+import (
+	"json2csv/jsonpointer"
+	"strings"
+)
 
 type pointers []jsonpointer.JSONPointer
 
@@ -25,6 +28,22 @@ func (pts pointers) Strings() []string {
 	keys := make([]string, 0, pts.Len())
 	for _, p := range pts {
 		keys = append(keys, p.String())
+	}
+	return keys
+}
+
+func (pts pointers) Slashes() []string {
+	keys := make([]string, 0, pts.Len())
+	for _, p := range pts {
+		keys = append(keys, strings.Join(p.Strings(), "/"))
+	}
+	return keys
+}
+
+func (pts pointers) DotNotations(bracketIndex bool) []string {
+	keys := make([]string, 0, pts.Len())
+	for _, p := range pts {
+		keys = append(keys, p.DotNotation(bracketIndex))
 	}
 	return keys
 }
