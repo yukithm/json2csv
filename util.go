@@ -25,7 +25,7 @@ func valueOf(obj interface{}) reflect.Value {
 		v = reflect.ValueOf(obj)
 	}
 
-	for v.Kind() == reflect.Interface {
+	for v.Kind() == reflect.Interface && !v.IsNil() {
 		v = v.Elem()
 	}
 	return v
