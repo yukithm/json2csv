@@ -20,7 +20,11 @@ func debugPrint(obj interface{}) {
 }
 
 func valueOf(obj interface{}) reflect.Value {
-	v := reflect.ValueOf(obj)
+	v, ok := obj.(reflect.Value)
+	if !ok {
+		v = reflect.ValueOf(obj)
+	}
+
 	for v.Kind() == reflect.Interface {
 		v = v.Elem()
 	}

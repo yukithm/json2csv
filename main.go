@@ -59,8 +59,13 @@ func main() {
 		result := flatten(v)
 		results = append(results, result)
 	case reflect.Slice:
-		for i := 0; i < v.Len(); i++ {
-			result := flatten(v.Index(i))
+		if isObjectArray(v) {
+			for i := 0; i < v.Len(); i++ {
+				result := flatten(v.Index(i))
+				results = append(results, result)
+			}
+		} else {
+			result := flatten(v)
 			results = append(results, result)
 		}
 	default:
@@ -108,4 +113,19 @@ func printCSV(w io.Writer, results []keyValue, headerStyle keyStyle) error {
 		return err
 	}
 	return nil
+}
+
+func isObjectArray(obj interface{}) bool {
+	value := valueOf(obj)
+	if value.Kind() != reflect.Slice {
+		return false
+	}
+
+	for i := 0; i < value.Len(); i++ {
+		if valueOf(value.Index(i)).Kind() != reflect.Map {
+			return false
+		}
+	}
+
+	return true
 }
