@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"io"
 	"json2csv/jsonpointer"
-	"log"
 	"sort"
 )
 
@@ -34,7 +33,10 @@ func NewCSVWriter(w io.Writer) *CSVWriter {
 
 // WriteCSV writes CSV data.
 func (w *CSVWriter) WriteCSV(results []keyValue) error {
-	pts := allPointers(results)
+	pts, err := allPointers(results)
+	if err != nil {
+		return err
+	}
 	sort.Sort(pts)
 	keys := pts.Strings()
 
@@ -69,7 +71,7 @@ func (w *CSVWriter) WriteCSV(results []keyValue) error {
 	return nil
 }
 
-func allPointers(results []keyValue) (pointers pointers) {
+func allPointers(results []keyValue) (pointers pointers, err error) {
 	set := make(map[string]bool, 0)
 	for _, result := range results {
 		for _, key := range result.Keys() {
@@ -77,7 +79,7 @@ func allPointers(results []keyValue) (pointers pointers) {
 				set[key] = true
 				pointer, err := jsonpointer.NewJSONPointer(key)
 				if err != nil {
-					log.Fatal(err)
+					return nil, err
 				}
 				pointers = append(pointers, pointer)
 			}
