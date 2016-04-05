@@ -22,8 +22,15 @@ var headerStyleTable = map[string]keyStyle{
 	"dot-bracket": DotBracketStyle,
 }
 
+// USAGE for go-flags parser.
+const USAGE = `[OPTION] [FILE]
+
+Conver JSON FILE or STDIN to CSV.
+`
+
 func main() {
 	oparser := flags.NewParser(&options, flags.HelpFlag|flags.PassDoubleDash|flags.PassAfterNonOption)
+	oparser.Usage = USAGE
 	args, err := oparser.Parse()
 	if err != nil {
 		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
