@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"json2csv/jsonpointer"
 	"log"
 	"os"
 	"reflect"
@@ -13,6 +14,7 @@ import (
 
 var options struct {
 	HeaderStyle string `long:"header-style" choice:"jsonpointer" choice:"slash" choice:"dot" choice:"dot-bracket" default:"jsonpointer" description:"Header style"`
+	Path        string `long:"path" description:"Target path (JSON Pointer) of the JSON content"`
 }
 
 var headerStyleTable = map[string]keyStyle{
@@ -48,6 +50,13 @@ func main() {
 		}
 	} else {
 		if data, err = readJSON(); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if options.Path != "" {
+		data, err = jsonpointer.Get(data, options.Path)
+		if err != nil {
 			log.Fatal(err)
 		}
 	}
