@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,19 +35,16 @@ func main() {
 		log.Fatal("Unsupported JSON structure.")
 	}
 
-	fmt.Println(results)
-
-	js, err := json.MarshalIndent(results, "", "  ")
-	if err != nil {
+	if err := printCSV(os.Stdout, results); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(js))
 }
 
-func valueOf(obj interface{}) reflect.Value {
-	v := reflect.ValueOf(obj)
-	for v.Kind() == reflect.Interface {
-		v = v.Elem()
+func printCSV(w io.Writer, results []keyValue) error {
+	csv := NewCSVWriter(w)
+	csv.style = JSONPointerStyle
+	if err := csv.WriteCSV(results); err != nil {
+		return err
 	}
-	return v
+	return nil
 }
