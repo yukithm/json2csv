@@ -15,6 +15,7 @@ import (
 var options struct {
 	HeaderStyle string `long:"header-style" choice:"jsonpointer" choice:"slash" choice:"dot" choice:"dot-bracket" default:"jsonpointer" description:"Header style"`
 	Path        string `long:"path" description:"Target path (JSON Pointer) of the JSON content"`
+	Transpose   bool   `long:"transpose" description:"Transponse rows and columns"`
 }
 
 var headerStyleTable = map[string]keyStyle{
@@ -94,7 +95,7 @@ func main() {
 	}
 
 	headerStyle := headerStyleTable[options.HeaderStyle]
-	if err := printCSV(os.Stdout, results, headerStyle); err != nil {
+	if err := printCSV(os.Stdout, results, headerStyle, options.Transpose); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -127,9 +128,10 @@ func readJSONFile(filename string) (interface{}, error) {
 	return data, nil
 }
 
-func printCSV(w io.Writer, results []keyValue, headerStyle keyStyle) error {
+func printCSV(w io.Writer, results []keyValue, headerStyle keyStyle, transpose bool) error {
 	csv := NewCSVWriter(w)
-	csv.headerStyle = headerStyle
+	csv.HeaderStyle = headerStyle
+	csv.Transpose = transpose
 	if err := csv.WriteCSV(results); err != nil {
 		return err
 	}
