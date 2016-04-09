@@ -7,20 +7,28 @@ import (
 	"sort"
 )
 
-type keyStyle uint
+// KeyStyle represents the specific style of the key.
+type KeyStyle uint
 
 // Header style
 const (
-	JSONPointerStyle keyStyle = iota
+	// "/foo/bar/0/baz"
+	JSONPointerStyle KeyStyle = iota
+
+	// "foo/bar/0/baz"
 	SlashStyle
+
+	// "foo.bar.0.baz"
 	DotNotationStyle
+
+	// "foo.bar[0].baz"
 	DotBracketStyle
 )
 
 // CSVWriter writes CSV data.
 type CSVWriter struct {
 	*csv.Writer
-	HeaderStyle keyStyle
+	HeaderStyle KeyStyle
 	Transpose   bool
 }
 

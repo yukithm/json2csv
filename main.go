@@ -17,7 +17,7 @@ var options struct {
 	Transpose   bool   `long:"transpose" description:"Transponse rows and columns"`
 }
 
-var headerStyleTable = map[string]keyStyle{
+var headerStyleTable = map[string]KeyStyle{
 	"jsonpointer": JSONPointerStyle,
 	"slash":       SlashStyle,
 	"dot":         DotNotationStyle,
@@ -114,7 +114,7 @@ func _readJSON(r io.Reader) (interface{}, error) {
 	return data, nil
 }
 
-func printCSV(w io.Writer, results []KeyValue, headerStyle keyStyle, transpose bool) error {
+func printCSV(w io.Writer, results []KeyValue, headerStyle KeyStyle, transpose bool) error {
 	csv := NewCSVWriter(w)
 	csv.HeaderStyle = headerStyle
 	csv.Transpose = transpose
