@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"json2csv"
 	"json2csv/jsonpointer"
 	"log"
 	"os"
@@ -17,11 +18,11 @@ var options struct {
 	Transpose   bool   `long:"transpose" description:"Transponse rows and columns"`
 }
 
-var headerStyleTable = map[string]KeyStyle{
-	"jsonpointer": JSONPointerStyle,
-	"slash":       SlashStyle,
-	"dot":         DotNotationStyle,
-	"dot-bracket": DotBracketStyle,
+var headerStyleTable = map[string]json2csv.KeyStyle{
+	"jsonpointer": json2csv.JSONPointerStyle,
+	"slash":       json2csv.SlashStyle,
+	"dot":         json2csv.DotNotationStyle,
+	"dot-bracket": json2csv.DotBracketStyle,
 }
 
 // USAGE for go-flags parser.
@@ -63,7 +64,7 @@ func main() {
 		}
 	}
 
-	results, err := JSON2CSV(data)
+	results, err := json2csv.JSON2CSV(data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -114,8 +115,8 @@ func _readJSON(r io.Reader) (interface{}, error) {
 	return data, nil
 }
 
-func printCSV(w io.Writer, results []KeyValue, headerStyle KeyStyle, transpose bool) error {
-	csv := NewCSVWriter(w)
+func printCSV(w io.Writer, results []json2csv.KeyValue, headerStyle json2csv.KeyStyle, transpose bool) error {
+	csv := json2csv.NewCSVWriter(w)
 	csv.HeaderStyle = headerStyle
 	csv.Transpose = transpose
 	if err := csv.WriteCSV(results); err != nil {

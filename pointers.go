@@ -1,4 +1,4 @@
-package main
+package json2csv
 
 import (
 	"json2csv/jsonpointer"

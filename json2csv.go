@@ -1,4 +1,5 @@
-package main
+// Package json2csv provides JSON to CSV functions.
+package json2csv
 
 import (
 	"errors"
