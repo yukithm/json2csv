@@ -11,8 +11,8 @@ import (
 // JSONPointer is a sequence of Token.
 type JSONPointer []Token
 
-// NewJSONPointer parses a pointer string and creates a new JSONPointer.
-func NewJSONPointer(pointer string) (JSONPointer, error) {
+// New parses a pointer string and creates a new JSONPointer.
+func New(pointer string) (JSONPointer, error) {
 	pointer = strings.TrimSpace(pointer)
 	if pointer == "" {
 		return JSONPointer{}, nil
@@ -37,7 +37,7 @@ func NewJSONPointer(pointer string) (JSONPointer, error) {
 
 // Get retrieves a value from the obj.
 func Get(obj interface{}, pointer string) (interface{}, error) {
-	p, err := NewJSONPointer(pointer)
+	p, err := New(pointer)
 	if err != nil {
 		return nil, err
 	}

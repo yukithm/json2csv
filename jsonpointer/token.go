@@ -1,4 +1,3 @@
-// Package jsonpointer implements representations for JSON Pointer and tokens.
 package jsonpointer
 
 import (

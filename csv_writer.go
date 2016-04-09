@@ -101,7 +101,7 @@ func allPointers(results []KeyValue) (pointers pointers, err error) {
 		for _, key := range result.Keys() {
 			if !set[key] {
 				set[key] = true
-				pointer, err := jsonpointer.NewJSONPointer(key)
+				pointer, err := jsonpointer.New(key)
 				if err != nil {
 					return nil, err
 				}

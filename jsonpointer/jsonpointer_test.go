@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var testNewJSONPointerCases = []struct {
+var testNewCases = []struct {
 	pointer  string
 	expected []Token
 	err      string
@@ -22,9 +22,9 @@ var testNewJSONPointerCases = []struct {
 	{`foo`, nil, `Invalid JSON Pointer "foo"`},
 }
 
-func TestNewJSONPointer(t *testing.T) {
-	for caseIndex, testCase := range testNewJSONPointerCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+func TestNew(t *testing.T) {
+	for caseIndex, testCase := range testNewCases {
+		pointer, err := New(testCase.pointer)
 		actual := []Token(pointer)
 		if err != nil {
 			if err.Error() != testCase.err {
@@ -49,7 +49,7 @@ var testLenCases = []struct {
 
 func TestLen(t *testing.T) {
 	for caseIndex, testCase := range testLenCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -77,7 +77,7 @@ var testAppendCases = []struct {
 
 func TestAppend(t *testing.T) {
 	for caseIndex, testCase := range testAppendCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -106,7 +106,7 @@ var testPopCases = []struct {
 
 func TestPop(t *testing.T) {
 	for caseIndex, testCase := range testPopCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -124,8 +124,8 @@ func TestPop(t *testing.T) {
 }
 
 func TestClone(t *testing.T) {
-	orig, err := NewJSONPointer("/foo/bar")
-	pointer, err := NewJSONPointer("/foo/bar")
+	orig, err := New("/foo/bar")
+	pointer, err := New("/foo/bar")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +157,7 @@ var testStringsCases = []struct {
 
 func TestStrings(t *testing.T) {
 	for caseIndex, testCase := range testStringsCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -184,7 +184,7 @@ var testEscapedStringsCases = []struct {
 
 func TestEscapedStrings(t *testing.T) {
 	for caseIndex, testCase := range testEscapedStringsCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -211,7 +211,7 @@ var testStringCases = []struct {
 
 func TestString(t *testing.T) {
 	for caseIndex, testCase := range testStringCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -239,7 +239,7 @@ var testDotNotationCases = []struct {
 
 func TestDotNotation(t *testing.T) {
 	for caseIndex, testCase := range testDotNotationCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -287,7 +287,7 @@ func TestGet(t *testing.T) {
 	}
 
 	for caseIndex, testCase := range testGetCases {
-		pointer, err := NewJSONPointer(testCase.pointer)
+		pointer, err := New(testCase.pointer)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -302,7 +302,7 @@ func TestGet(t *testing.T) {
 	}
 
 	// root pointer
-	pointer, err := NewJSONPointer("")
+	pointer, err := New("")
 	if err != nil {
 		t.Fatal(err)
 	}
