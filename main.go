@@ -7,7 +7,6 @@ import (
 	"json2csv/jsonpointer"
 	"log"
 	"os"
-	"reflect"
 
 	"github.com/jessevdk/go-flags"
 )
@@ -48,14 +47,13 @@ func main() {
 	}
 
 	var data interface{}
-	if len(args) > 0 {
-		if data, err = readJSONFile(args[0]); err != nil {
-			log.Fatal(err)
-		}
+	if len(args) > 0 && args[0] != "-" {
+		data, err = readJSONFile(args[0], options.Path)
 	} else {
-		if data, err = readJSON(); err != nil {
-			log.Fatal(err)
-		}
+		data, err = readJSON(os.Stdin, options.Path)
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	if options.Path != "" {
@@ -65,33 +63,9 @@ func main() {
 		}
 	}
 
-	var results []keyValue
-	v := valueOf(data)
-	switch v.Kind() {
-	case reflect.Map:
-		if result, err := flatten(v); err != nil {
-			log.Fatal(err)
-		} else {
-			results = append(results, result)
-		}
-	case reflect.Slice:
-		if isObjectArray(v) {
-			for i := 0; i < v.Len(); i++ {
-				if result, err := flatten(v.Index(i)); err != nil {
-					log.Fatal(err)
-				} else {
-					results = append(results, result)
-				}
-			}
-		} else {
-			if result, err := flatten(v); err != nil {
-				log.Fatal(err)
-			} else {
-				results = append(results, result)
-			}
-		}
-	default:
-		log.Fatal("Unsupported JSON structure.")
+	results, err := JSON2CSV(data)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	headerStyle := headerStyleTable[options.HeaderStyle]
@@ -100,8 +74,34 @@ func main() {
 	}
 }
 
-func readJSON() (interface{}, error) {
-	buf, err := ioutil.ReadAll(os.Stdin)
+func readJSONFile(filename string, path string) (interface{}, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return readJSON(f, path)
+}
+
+func readJSON(r io.Reader, path string) (interface{}, error) {
+	data, err := _readJSON(r)
+	if err != nil {
+		return nil, err
+	}
+
+	if path != "" {
+		data, err = jsonpointer.Get(data, path)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return data, nil
+}
+
+func _readJSON(r io.Reader) (interface{}, error) {
+	buf, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -114,21 +114,7 @@ func readJSON() (interface{}, error) {
 	return data, nil
 }
 
-func readJSONFile(filename string) (interface{}, error) {
-	buf, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	var data interface{}
-	if err := json.Unmarshal(buf, &data); err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
-func printCSV(w io.Writer, results []keyValue, headerStyle keyStyle, transpose bool) error {
+func printCSV(w io.Writer, results []KeyValue, headerStyle keyStyle, transpose bool) error {
 	csv := NewCSVWriter(w)
 	csv.HeaderStyle = headerStyle
 	csv.Transpose = transpose
@@ -136,19 +122,4 @@ func printCSV(w io.Writer, results []keyValue, headerStyle keyStyle, transpose b
 		return err
 	}
 	return nil
-}
-
-func isObjectArray(obj interface{}) bool {
-	value := valueOf(obj)
-	if value.Kind() != reflect.Slice {
-		return false
-	}
-
-	for i := 0; i < value.Len(); i++ {
-		if valueOf(value.Index(i)).Kind() != reflect.Map {
-			return false
-		}
-	}
-
-	return true
 }

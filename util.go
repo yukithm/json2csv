@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func debugDump(results []keyValue) {
+func debugDump(results []KeyValue) {
 	js, err := json.MarshalIndent(results, "", "  ")
 	if err != nil {
 		log.Fatal(err)

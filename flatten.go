@@ -21,9 +21,9 @@ func sortedMapKeys(v reflect.Value) []reflect.Value {
 	return keys
 }
 
-type keyValue map[string]interface{}
+type KeyValue map[string]interface{}
 
-func (kv keyValue) Keys() []string {
+func (kv KeyValue) Keys() []string {
 	keys := make([]string, 0, len(kv))
 	for k := range kv {
 		keys = append(keys, k)
@@ -31,8 +31,8 @@ func (kv keyValue) Keys() []string {
 	return keys
 }
 
-func flatten(obj interface{}) (keyValue, error) {
-	f := make(keyValue, 0)
+func flatten(obj interface{}) (KeyValue, error) {
+	f := make(KeyValue, 0)
 	key := jsonpointer.JSONPointer{}
 	if err := _flatten(f, obj, key); err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func flatten(obj interface{}) (keyValue, error) {
 	return f, nil
 }
 
-func _flatten(out keyValue, obj interface{}, key jsonpointer.JSONPointer) error {
+func _flatten(out KeyValue, obj interface{}, key jsonpointer.JSONPointer) error {
 	value, ok := obj.(reflect.Value)
 	if !ok {
 		value = reflect.ValueOf(obj)

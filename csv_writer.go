@@ -34,7 +34,7 @@ func NewCSVWriter(w io.Writer) *CSVWriter {
 }
 
 // WriteCSV writes CSV data.
-func (w *CSVWriter) WriteCSV(results []keyValue) error {
+func (w *CSVWriter) WriteCSV(results []KeyValue) error {
 	if w.Transpose {
 		return w.writeTransposedCSV(results)
 	}
@@ -42,7 +42,7 @@ func (w *CSVWriter) WriteCSV(results []keyValue) error {
 }
 
 // WriteCSV writes CSV data.
-func (w *CSVWriter) writeCSV(results []keyValue) error {
+func (w *CSVWriter) writeCSV(results []KeyValue) error {
 	pts, err := allPointers(results)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (w *CSVWriter) writeCSV(results []keyValue) error {
 }
 
 // WriteCSV writes CSV data which is transposed rows and columns.
-func (w *CSVWriter) writeTransposedCSV(results []keyValue) error {
+func (w *CSVWriter) writeTransposedCSV(results []KeyValue) error {
 	pts, err := allPointers(results)
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (w *CSVWriter) writeTransposedCSV(results []keyValue) error {
 	return nil
 }
 
-func allPointers(results []keyValue) (pointers pointers, err error) {
+func allPointers(results []KeyValue) (pointers pointers, err error) {
 	set := make(map[string]bool, 0)
 	for _, result := range results {
 		for _, key := range result.Keys() {
@@ -127,7 +127,7 @@ func (w *CSVWriter) getHeader(pointers pointers) []string {
 	}
 }
 
-func toRecord(kv keyValue, keys []string) []string {
+func toRecord(kv KeyValue, keys []string) []string {
 	record := make([]string, 0, len(keys))
 	for _, key := range keys {
 		if value, ok := kv[key]; ok {
@@ -139,7 +139,7 @@ func toRecord(kv keyValue, keys []string) []string {
 	return record
 }
 
-func toTransposedRecord(results []keyValue, key string, header string) []string {
+func toTransposedRecord(results []KeyValue, key string, header string) []string {
 	record := make([]string, 0, len(results)+1)
 	record = append(record, header)
 	for _, result := range results {
