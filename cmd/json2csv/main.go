@@ -27,10 +27,37 @@ func main() {
 	// Hide timestamp because this is CLI application, so just print message for users.
 	log.SetFlags(0)
 
+	cli.AppHelpTemplate = `NAME:
+   {{.Name}} - {{.Usage}}
+
+USAGE:
+   {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .Flags}}[OPTIONS]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
+
+   If no files are specified, JSON content is read from STDIN.
+   {{if .Version}}{{if not .HideVersion}}
+VERSION:
+   {{.Version}}
+   {{end}}{{end}}{{if len .Authors}}
+AUTHOR(S):
+   {{range .Authors}}{{ . }}{{end}}
+   {{end}}{{if .Commands}}
+COMMANDS:{{range .Categories}}{{if .Name}}
+  {{.Name}}{{ ":" }}{{end}}{{range .Commands}}
+    {{.Name}}{{with .ShortName}}, {{.}}{{end}}{{ "\t" }}{{.Usage}}{{end}}
+{{end}}{{end}}{{if .Flags}}
+OPTIONS:
+   {{range .Flags}}{{.}}
+   {{end}}{{end}}{{if .Copyright }}
+COPYRIGHT:
+   {{.Copyright}}
+   {{end}}
+`
+
 	app := cli.NewApp()
 	app.Name = "json2csv"
 	app.Version = VERSION
 	app.Usage = "convert JSON to CSV"
+	app.ArgsUsage = "[FILE]"
 	app.HideHelp = true
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
