@@ -49,9 +49,9 @@ func main() {
 
 	var data interface{}
 	if len(args) > 0 && args[0] != "-" {
-		data, err = readJSONFile(args[0], options.Path)
+		data, err = readJSONFile(args[0])
 	} else {
-		data, err = readJSON(os.Stdin, options.Path)
+		data, err = readJSON(os.Stdin)
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -75,33 +75,17 @@ func main() {
 	}
 }
 
-func readJSONFile(filename string, path string) (interface{}, error) {
+func readJSONFile(filename string) (interface{}, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	return readJSON(f, path)
+	return readJSON(f)
 }
 
-func readJSON(r io.Reader, path string) (interface{}, error) {
-	data, err := _readJSON(r)
-	if err != nil {
-		return nil, err
-	}
-
-	if path != "" {
-		data, err = jsonpointer.Get(data, path)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return data, nil
-}
-
-func _readJSON(r io.Reader) (interface{}, error) {
+func readJSON(r io.Reader) (interface{}, error) {
 	buf, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
