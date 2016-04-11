@@ -13,8 +13,13 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-// VERSION is the version number of this application.
-const VERSION = "0.1.0"
+const (
+	// ApplicationName is the name of this application.
+	ApplicationName = "json2csv"
+
+	// Version is the version number of this application.
+	Version = "0.1.0"
+)
 
 var headerStyleTable = map[string]json2csv.KeyStyle{
 	"jsonpointer": json2csv.JSONPointerStyle,
@@ -54,8 +59,8 @@ COPYRIGHT:
 `
 
 	app := cli.NewApp()
-	app.Name = "json2csv"
-	app.Version = VERSION
+	app.Name = ApplicationName
+	app.Version = Version
 	app.Usage = "convert JSON to CSV"
 	app.ArgsUsage = "[FILE]"
 	app.HideHelp = true
