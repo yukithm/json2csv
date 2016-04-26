@@ -1,0 +1,3 @@
+package: github.com/yukithm/json2csv
+import:
+- package: github.com/codegangsta/cli
