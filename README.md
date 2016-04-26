@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/yukithm/json2csv.svg?branch=master)](https://travis-ci.org/yukithm/json2csv)
+
 json2csv
 ========
 
