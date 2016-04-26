@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"json2csv"
-	"json2csv/jsonpointer"
 	"log"
 	"os"
+
+	"github.com/yukithm/json2csv"
+	"github.com/yukithm/json2csv/jsonpointer"
 
 	"github.com/codegangsta/cli"
 )

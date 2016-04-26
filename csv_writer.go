@@ -3,8 +3,9 @@ package json2csv
 import (
 	"encoding/csv"
 	"io"
-	"json2csv/jsonpointer"
 	"sort"
+
+	"github.com/yukithm/json2csv/jsonpointer"
 )
 
 // KeyStyle represents the specific style of the key.

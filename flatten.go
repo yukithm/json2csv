@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strconv"
 
-	"json2csv/jsonpointer"
+	"github.com/yukithm/json2csv/jsonpointer"
 )
 
 type mapKeys []reflect.Value
