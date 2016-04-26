@@ -21,8 +21,10 @@ func sortedMapKeys(v reflect.Value) []reflect.Value {
 	return keys
 }
 
+// KeyValue represents key(path)/value map.
 type KeyValue map[string]interface{}
 
+// Keys returns all keys.
 func (kv KeyValue) Keys() []string {
 	keys := make([]string, 0, len(kv))
 	for k := range kv {
