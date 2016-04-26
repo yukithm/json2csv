@@ -1,3 +1,6 @@
 cmd/json2csv/json2csv
 cmd/json2csv/json2csv.exe
+json2csv
 tmp/
+devtool/
+releases/
