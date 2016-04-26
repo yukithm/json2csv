@@ -123,6 +123,9 @@ func mainAction(c *cli.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if len(results) == 0 {
+		return
+	}
 
 	headerStyle := headerStyleTable[c.String("header-style")]
 	err = printCSV(os.Stdout, results, headerStyle, c.Bool("transpose"))

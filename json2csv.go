@@ -8,15 +8,17 @@ import (
 
 // JSON2CSV converts JSON to CSV.
 func JSON2CSV(data interface{}) ([]KeyValue, error) {
-	var results []KeyValue
+	results := []KeyValue{}
 	v := valueOf(data)
 	switch v.Kind() {
 	case reflect.Map:
-		result, err := flatten(v)
-		if err != nil {
-			return nil, err
+		if v.Len() > 0 {
+			result, err := flatten(v)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, result)
 		}
-		results = append(results, result)
 	case reflect.Slice:
 		if isObjectArray(v) {
 			for i := 0; i < v.Len(); i++ {
@@ -26,12 +28,14 @@ func JSON2CSV(data interface{}) ([]KeyValue, error) {
 				}
 				results = append(results, result)
 			}
-		} else {
+		} else if v.Len() > 0 {
 			result, err := flatten(v)
 			if err != nil {
 				return nil, err
 			}
-			results = append(results, result)
+			if result != nil {
+				results = append(results, result)
+			}
 		}
 	default:
 		return nil, errors.New("Unsupported JSON structure.")
@@ -46,7 +50,11 @@ func isObjectArray(obj interface{}) bool {
 		return false
 	}
 
-	for i := 0; i < value.Len(); i++ {
+	len := value.Len()
+	if len == 0 {
+		return false
+	}
+	for i := 0; i < len; i++ {
 		if valueOf(value.Index(i)).Kind() != reflect.Map {
 			return false
 		}
