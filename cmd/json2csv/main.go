@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -19,7 +18,7 @@ const (
 	ApplicationName = "json2csv"
 
 	// Version is the version number of this application.
-	Version = "0.1.0"
+	Version = "0.1.1"
 )
 
 var headerStyleTable = map[string]json2csv.KeyStyle{
@@ -145,13 +144,11 @@ func readJSONFile(filename string) (interface{}, error) {
 }
 
 func readJSON(r io.Reader) (interface{}, error) {
-	buf, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
+	decoder := json.NewDecoder(r)
+	decoder.UseNumber()
 
 	var data interface{}
-	if err := json.Unmarshal(buf, &data); err != nil {
+	if err := decoder.Decode(&data); err != nil {
 		return nil, err
 	}
 
