@@ -1,6 +1,7 @@
 package json2csv
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"sort"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/yukithm/json2csv/jsonpointer"
 )
+
+var jsonNumberType = reflect.TypeOf(json.Number(""))
 
 type mapKeys []reflect.Value
 
@@ -49,6 +52,14 @@ func _flatten(out KeyValue, obj interface{}, key jsonpointer.JSONPointer) error 
 	}
 	for value.Kind() == reflect.Interface {
 		value = value.Elem()
+	}
+
+	if value.IsValid() {
+		vt := value.Type()
+		if vt.AssignableTo(jsonNumberType) {
+			out[key.String()] = value.Interface().(json.Number)
+			return nil
+		}
 	}
 
 	switch value.Kind() {

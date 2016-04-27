@@ -1,10 +1,23 @@
 package json2csv
 
 import (
+	"bytes"
 	"encoding/json"
 	"reflect"
 	"testing"
 )
+
+// Decode JSON with UseNumber option.
+func json2obj(jsonstr string) (interface{}, error) {
+	r := bytes.NewReader([]byte(jsonstr))
+	d := json.NewDecoder(r)
+	d.UseNumber()
+	var obj interface{}
+	if err := d.Decode(&obj); err != nil {
+		return nil, err
+	}
+	return obj, nil
+}
 
 var testJSON2CSVCases = []struct {
 	json     string
@@ -17,8 +30,8 @@ var testJSON2CSVCases = []struct {
 			{"id": 2, "name": "bar"}
 		]`,
 		[]KeyValue{
-			{"/id": 1.0, "/name": "foo"},
-			{"/id": 2.0, "/name": "bar"},
+			{"/id": json.Number("1"), "/name": "foo"},
+			{"/id": json.Number("2"), "/name": "bar"},
 		},
 		``,
 	},
@@ -28,8 +41,8 @@ var testJSON2CSVCases = []struct {
 			{"id": 2, "name~b": "bar"}
 		]`,
 		[]KeyValue{
-			{"/id": 1.0, "/name~1a": "foo"},
-			{"/id": 2.0, "/name~0b": "bar"},
+			{"/id": json.Number("1"), "/name~1a": "foo"},
+			{"/id": json.Number("2"), "/name~0b": "bar"},
 		},
 		``,
 	},
@@ -39,8 +52,8 @@ var testJSON2CSVCases = []struct {
 			{"id":2, "values":["x"]}
 		]`,
 		[]KeyValue{
-			{"/id": 1.0, "/values/0": "a", "/values/1": "b"},
-			{"/id": 2.0, "/values/0": "x"},
+			{"/id": json.Number("1"), "/values/0": "a", "/values/1": "b"},
+			{"/id": json.Number("2"), "/values/0": "x"},
 		},
 		``,
 	},
@@ -50,8 +63,8 @@ var testJSON2CSVCases = []struct {
 			{"id":2, "values":["x"]}
 		]`,
 		[]KeyValue{
-			{"/id": 1.0},
-			{"/id": 2.0, "/values/0": "x"},
+			{"/id": json.Number("1")},
+			{"/id": json.Number("2"), "/values/0": "x"},
 		},
 		``,
 	},
@@ -61,8 +74,8 @@ var testJSON2CSVCases = []struct {
 			{"id":2, "values":["x"]}
 		]`,
 		[]KeyValue{
-			{"/id": 1.0},
-			{"/id": 2.0, "/values/0": "x"},
+			{"/id": json.Number("1")},
+			{"/id": json.Number("2"), "/values/0": "x"},
 		},
 		``,
 	},
@@ -75,7 +88,7 @@ var testJSON2CSVCases = []struct {
 			]
 		}`,
 		[]KeyValue{
-			{"/id": 123.0, "/values/0/foo": "FOO", "/values/1/bar": "BAR"},
+			{"/id": json.Number("123"), "/values/0/foo": "FOO", "/values/1/bar": "BAR"},
 		},
 		``,
 	},
@@ -89,6 +102,16 @@ var testJSON2CSVCases = []struct {
 		[]KeyValue{},
 		``,
 	},
+	{
+		`{"large_int_value": 146163870300}`,
+		[]KeyValue{{"/large_int_value": json.Number("146163870300")}},
+		``,
+	},
+	{
+		`{"float_value": 146163870.300}`,
+		[]KeyValue{{"/float_value": json.Number("146163870.300")}},
+		``,
+	},
 	{`"foo"`, nil, `Unsupported JSON structure.`},
 	{`123`, nil, `Unsupported JSON structure.`},
 	{`true`, nil, `Unsupported JSON structure.`},
@@ -96,8 +119,7 @@ var testJSON2CSVCases = []struct {
 
 func TestJSON2CSV(t *testing.T) {
 	for caseIndex, testCase := range testJSON2CSVCases {
-		var obj interface{}
-		err := json.Unmarshal([]byte(testCase.json), &obj)
+		obj, err := json2obj(testCase.json)
 		if err != nil {
 			t.Fatal(err)
 		}
