@@ -10,7 +10,7 @@ import (
 	"github.com/yukithm/json2csv"
 	"github.com/yukithm/json2csv/jsonpointer"
 
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 const (
