@@ -1,6 +1,9 @@
 language: go
 go:
-    - 1.6
+    - 1.12.x
     - tip
 sudo: false
-script: go test -v $(go list ./... | grep -v "/vendor/")
+env:
+    - GO111MODULE=on
+script:
+    - go test -v ./...
