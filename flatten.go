@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/yukithm/afghanistanyn/jsonpointer"
+	"github.com/afghanistanyn/json2csv/jsonpointer"
 )
 
 var jsonNumberType = reflect.TypeOf(json.Number(""))
