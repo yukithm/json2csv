@@ -3,7 +3,7 @@ package json2csv
 import (
 	"strings"
 
-	"github.com/yukithm/json2csv/jsonpointer"
+	"github.com/yukithm/afghanistanyn/jsonpointer"
 )
 
 type pointers []jsonpointer.JSONPointer
