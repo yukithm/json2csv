@@ -18,7 +18,7 @@ json2csv: *.go jsonpointer/*.go cmd/json2csv/*.go
 	go build $(GO_FLAGS) ./cmd/json2csv
 
 test:
-	go test
+	go test -v ./...
 
 install: all
 	install -d $(BINDIR)
