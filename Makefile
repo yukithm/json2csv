@@ -1,39 +1,60 @@
-PREFIX = /usr/local
-BINDIR = $(PREFIX)/bin
-DISTDIR = releases
-GO_FLAGS = -ldflags="-s -w"
-DEVTOOLS_DIR = $(CURDIR)/devtools
-DEVTOOLS_BIN = $(DEVTOOLS_DIR)/bin
-GOX = $(DEVTOOLS_BIN)/gox
-OSARCH = linux/amd64 linux/arm darwin/amd64 windows/386 windows/amd64
-DIST_FORMAT = $(DISTDIR)/{{.Dir}}-{{.OS}}-{{.Arch}}
+NAME := json2csv
+PREFIX := /usr/local
+BINDIR := $(PREFIX)/bin
 
-.PHONY: all test build install clean dist dist-clean $(GOX) devtools
+VERSION := $(shell git describe --tags --always --dirty=-dev)
+LDFLAGS := -s -w -X 'main.version=$(VERSION)'
 
-all: build
+DEVTOOLS_DIR := $(CURDIR)/devtools
+DEVTOOLS_BIN := $(DEVTOOLS_DIR)/bin
 
-build: json2csv
+DISTDIR := releases
+OSARCH := linux/amd64 linux/arm darwin/amd64 windows/386 windows/amd64
+DIST_FORMAT := $(DISTDIR)/{{.Dir}}-{{.OS}}-{{.Arch}}
 
-json2csv: *.go jsonpointer/*.go cmd/json2csv/*.go
-	go build $(GO_FLAGS) ./cmd/json2csv
+SOURCES := $(shell find . -type f -name "*.go")
 
-test:
-	go test -v ./...
+export GO111MODULE=on
 
-install: all
+.PHONY: build
+build: $(NAME)
+
+$(NAME): $(SOURCES)
+	go build -ldflags "$(LDFLAGS)" ./cmd/$(NAME)
+
+.PHONY: install
+install: build
 	install -d $(BINDIR)
-	install json2csv $(BINDIR)
+	install $(NAME) $(BINDIR)
 
+.PHONY: dist
+dist: devtools
+	$(DEVTOOLS_BIN)/gox -osarch="$(OSARCH)" -ldflags "$(LDFLAGS)" -output="$(DIST_FORMAT)" ./cmd/$(NAME)
+
+.PHONY: dist-clean
+dist-clean: clean
+	rm -rf "$(DISTDIR)" "$(DEVTOOLS_BIN)"
+
+.PHONY: clean
 clean:
-	rm -f json2csv
+	rm -f $(NAME) $(NAME).exe ./cmd/$(NAME)/$(NAME) ./cmd/$(NAME)/$(NAME).exe
 
-dist: $(GOX)
-	$(GOX) -osarch="$(OSARCH)" $(GO_FLAGS) -output="$(DIST_FORMAT)" ./cmd/json2csv
+.PHONY: test
+test:
+	go test -v ./... -cover
 
-dist-clean:
-	rm -rf json2csv json2csv.exe $(DISTDIR) $(DEVTOOLS_BIN)
+.PHONY: deps
+deps: download-deps devtools
 
-$(GOX): devtools
+.PHONY: download-deps
+download-deps:
+	go get -v -d
 
+.PHONY: devtools
 devtools:
 	go generate $(DEVTOOLS_DIR)/devtools.go
+
+.PHONY: lint
+lint:
+	go vet ./...
+	golint -set_exit_status ./...

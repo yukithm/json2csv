@@ -16,10 +16,10 @@ import (
 const (
 	// ApplicationName is the name of this application.
 	ApplicationName = "json2csv"
-
-	// Version is the version number of this application.
-	Version = "0.1.1"
 )
+
+// injected by build process
+var version = "unknown"
 
 var headerStyleTable = map[string]json2csv.KeyStyle{
 	"jsonpointer": json2csv.JSONPointerStyle,
@@ -60,7 +60,7 @@ COPYRIGHT:
 
 	app := cli.NewApp()
 	app.Name = ApplicationName
-	app.Version = Version
+	app.Version = version
 	app.Usage = "convert JSON to CSV"
 	app.ArgsUsage = "[FILE]"
 	app.HideHelp = true
