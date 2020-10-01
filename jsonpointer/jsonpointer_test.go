@@ -16,6 +16,10 @@ var testNewCases = []struct {
 	{`/foo~1bar`, []Token{`foo/bar`}, ``},
 	{`/foo/bar`, []Token{`foo`, `bar`}, ``},
 	{`/foo/0/bar`, []Token{`foo`, `0`, `bar`}, ``},
+	{`/foo `, []Token{`foo `}, ``},
+	{`/ foo`, []Token{` foo`}, ``},
+	{`/ foo `, []Token{` foo `}, ``},
+	{`/foo / bar `, []Token{`foo `, ` bar `}, ``},
 	{`/`, []Token{""}, ``},      // empty string key
 	{`//`, []Token{"", ""}, ``}, // empty string key
 	{``, []Token{}, ``},         // whole content (root)
@@ -70,6 +74,11 @@ var testAppendCases = []struct {
 	{`/foo~1bar`, `append`, `/foo~1bar/append`},
 	{`/foo/bar`, `append`, `/foo/bar/append`},
 	{`/foo/0/bar`, `append`, `/foo/0/bar/append`},
+	{`/foo`, `append `, `/foo/append `},
+	{`/foo`, ` append`, `/foo/ append`},
+	{`/foo`, ` append `, `/foo/ append `},
+	{`/foo `, `append`, `/foo /append`},
+	{`/ foo`, `append`, `/ foo/append`},
 	{`/`, `append`, `//append`},
 	{`//`, `append`, `///append`},
 	{``, `append`, `/append`},
@@ -99,6 +108,9 @@ var testPopCases = []struct {
 	{`/foo~1bar`, `foo/bar`, ``},
 	{`/foo/bar`, `bar`, `/foo`},
 	{`/foo/0/bar`, `bar`, `/foo/0`},
+	{`/ foo `, ` foo `, ``},
+	{`/foo/ bar `, ` bar `, `/foo`},
+	{`/ foo / bar `, ` bar `, `/ foo `},
 	{`/`, ``, ``},
 	{`//`, ``, `/`},
 	{``, ``, ``},
@@ -150,6 +162,8 @@ var testStringsCases = []struct {
 	{`/foo~1bar`, []string{`foo/bar`}},
 	{`/foo/bar`, []string{`foo`, `bar`}},
 	{`/foo/0/bar`, []string{`foo`, `0`, `bar`}},
+	{`/ foo `, []string{` foo `}},
+	{`/ foo / bar `, []string{` foo `, ` bar `}},
 	{`/`, []string{""}},      // empty string key
 	{`//`, []string{"", ""}}, // empty string key
 	{``, []string{}},         // whole content (root)
@@ -177,6 +191,8 @@ var testEscapedStringsCases = []struct {
 	{`/foo~1bar`, []string{`foo~1bar`}},
 	{`/foo/bar`, []string{`foo`, `bar`}},
 	{`/foo/0/bar`, []string{`foo`, `0`, `bar`}},
+	{`/ foo `, []string{` foo `}},
+	{`/ foo / bar `, []string{` foo `, ` bar `}},
 	{`/`, []string{""}},      // empty string key
 	{`//`, []string{"", ""}}, // empty string key
 	{``, []string{}},         // whole content (root)
@@ -204,6 +220,8 @@ var testStringCases = []struct {
 	{`/foo~1bar`, `/foo~1bar`},
 	{`/foo/bar`, `/foo/bar`},
 	{`/foo/0/bar`, `/foo/0/bar`},
+	{`/ foo `, `/ foo `},
+	{`/ foo / bar `, `/ foo / bar `},
 	{`/`, `/`},   // empty string key
 	{`//`, `//`}, // empty string key
 	{``, ``},     // whole content (root)
@@ -232,6 +250,9 @@ var testDotNotationCases = []struct {
 	{`/foo~1bar`, `foo/bar`, `foo/bar`},
 	{`/foo/bar`, `foo.bar`, `foo.bar`},
 	{`/foo/0/bar`, `foo.0.bar`, `foo[0].bar`},
+	{`/ foo `, ` foo `, ` foo `},
+	{`/ foo / bar `, ` foo . bar `, ` foo . bar `},
+	{`/ foo /0/ bar `, ` foo .0. bar `, ` foo [0]. bar `},
 	{`/`, ``, ``},    // empty string key
 	{`//`, `.`, `.`}, // empty string key
 	{``, ``, ``},     // whole content (root)
@@ -263,7 +284,10 @@ var testGetJSON = `{
 	},
 	"foo/bar": 1.23,
 	"bar": true,
-	"baz": null
+	"baz": null,
+	" foo ": {
+		" bar ": 456
+	}
 }`
 var testGetCases = []struct {
 	pointer  string
@@ -278,6 +302,7 @@ var testGetCases = []struct {
 	{`/bar`, true, ``},
 	{`/baz`, nil, ``},
 	{`/boo`, nil, `Invalid JSON Pointer "/boo"`},
+	{`/ foo / bar `, 456.0, ``},
 }
 
 func TestGet(t *testing.T) {

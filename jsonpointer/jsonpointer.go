@@ -13,7 +13,6 @@ type JSONPointer []Token
 
 // New parses a pointer string and creates a new JSONPointer.
 func New(pointer string) (JSONPointer, error) {
-	pointer = strings.TrimSpace(pointer)
 	if pointer == "" {
 		return JSONPointer{}, nil
 	}
