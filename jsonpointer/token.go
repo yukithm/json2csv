@@ -13,20 +13,25 @@ func NewTokenFromEscaped(token string) Token {
 	return Token(UnescapeTokenString(token))
 }
 
-// UnescapeTokenString returns unescaped representation of the token.
-func UnescapeTokenString(token string) string {
-	return strings.NewReplacer(
+var (
+	unescape = strings.NewReplacer(
 		"~1", "/",
 		"~0", "~",
-	).Replace(token)
+	)
+	escape = strings.NewReplacer(
+		"~", "~0",
+		"/", "~1",
+	)
+)
+
+// UnescapeTokenString returns unescaped representation of the token.
+func UnescapeTokenString(token string) string {
+	return unescape.Replace(token)
 }
 
 // EscapedString returns escaped representation of the token.
 func (t Token) EscapedString() string {
-	return strings.NewReplacer(
-		"~", "~0",
-		"/", "~1",
-	).Replace(string(t))
+	return escape.Replace(string(t))
 }
 
 // IsInt returns true if the token is an integer like string.
