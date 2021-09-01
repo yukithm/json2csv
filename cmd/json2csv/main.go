@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/yukithm/json2csv"
 	"github.com/yukithm/json2csv/jsonpointer"
@@ -108,7 +109,7 @@ func mainAction(c *cli.Context) {
 		data, err = readJSON(os.Stdin)
 	}
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("readJSON failed, err=%v", err)
 	}
 
 	if c.String("path") != "" {
@@ -143,16 +144,24 @@ func readJSONFile(filename string) (interface{}, error) {
 	return readJSON(f)
 }
 
-func readJSON(r io.Reader) (interface{}, error) {
+func readJSON(r *os.File) (interface{}, error) {
 	decoder := json.NewDecoder(r)
 	decoder.UseNumber()
 
 	var data interface{}
-	if err := decoder.Decode(&data); err != nil {
-		return nil, err
-	}
+	err := decoder.Decode(&data)
 
-	return data, nil
+	if err == nil {
+		return data, nil
+	}
+	if jsonError, ok := err.(*json.SyntaxError); ok {
+		jsonData, _ := ReadFile(r)
+
+		line := 1 + strings.Count(string(jsonData[:jsonError.Offset]), "\n")
+		column := 1 + int(jsonError.Offset) - (strings.LastIndex(string(jsonData[:jsonError.Offset]), "\n") + len("\n"))
+		return nil, fmt.Errorf("cannot parse JSON schema due to a syntax error at line %d, column %d: %v", line, column, jsonError.Error())
+	}
+	return nil, fmt.Errorf("parse JSON schema failed, err=%v", err)
 }
 
 func printCSV(w io.Writer, results []json2csv.KeyValue, headerStyle json2csv.KeyStyle, transpose bool) error {
@@ -163,4 +172,44 @@ func printCSV(w io.Writer, results []json2csv.KeyValue, headerStyle json2csv.Key
 		return err
 	}
 	return nil
+}
+
+// ReadFile reads from a *os.File and returns the contents.
+// took from stdlib os.ReadFile
+// A successful call returns err == nil, not err == EOF.
+// Because ReadFile reads the whole file, it does not treat an EOF from Read
+// as an error to be reported.
+func ReadFile(f *os.File) ([]byte, error) {
+	var size int
+	if info, err := f.Stat(); err == nil {
+		size64 := info.Size()
+		if int64(int(size64)) == size64 {
+			size = int(size64)
+		}
+	}
+	size++ // one byte for final read at EOF
+
+	// If a file claims a small size, read at least 512 bytes.
+	// In particular, files in Linux's /proc claim size 0 but
+	// then do not work right if read in small pieces,
+	// so an initial read of 1 byte would not work correctly.
+	if size < 512 {
+		size = 512
+	}
+
+	data := make([]byte, 0, size)
+	for {
+		if len(data) >= cap(data) {
+			d := append(data[:cap(data)], 0)
+			data = d[:len(data)]
+		}
+		n, err := f.Read(data[len(data):cap(data)])
+		data = data[:len(data)+n]
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+			}
+			return data, err
+		}
+	}
 }
