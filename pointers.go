@@ -25,6 +25,32 @@ func (pts pointers) Less(i, j int) bool {
 	return false
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+type pointersByLexical pointers
+
+func (pts pointersByLexical) Len() int      { return len(pts) }
+func (pts pointersByLexical) Swap(i, j int) { pts[i], pts[j] = pts[j], pts[i] }
+func (pts pointersByLexical) Less(i, j int) bool {
+	// Compare each part
+	for n := 0; n < min(pts[i].Len(), pts[j].Len()); n++ {
+		if pts[i][n] != pts[j][n] {
+			return pts[i][n] < pts[j][n]
+		}
+	}
+
+	if pts[i].Len() != pts[j].Len() {
+		return pts[i].Len() < pts[j].Len()
+	}
+
+	return false
+}
+
 func (pts pointers) Strings() []string {
 	keys := make([]string, 0, pts.Len())
 	for _, p := range pts {
