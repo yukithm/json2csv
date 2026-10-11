@@ -121,6 +121,9 @@ func (p JSONPointer) DotNotation(bracketIndex bool) string {
 	for _, token := range p {
 		if token.IsIndex() {
 			// foo[0] style
+			if len(tokens) == 0 {
+				tokens = append(tokens, "")
+			}
 			tokens[len(tokens)-1] += fmt.Sprintf("[%s]", token)
 		} else {
 			tokens = append(tokens, string(token))
